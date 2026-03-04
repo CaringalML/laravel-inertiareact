@@ -158,22 +158,22 @@ export default function Edit({ employee }) {
                         >
                             {processing ? 'Updating...' : 'Update Employee'}
                         </button>
-                        <Link href="/employees">
-                            <button
-                                type="button"
-                                style={{
-                                    background: '#6c757d',
-                                    color: 'white',
-                                    padding: '10px 30px',
-                                    border: 'none',
-                                    borderRadius: '4px',
-                                    cursor: 'pointer',
-                                    fontSize: '14px',
-                                    fontWeight: 'bold'
-                                }}
-                            >
-                                Cancel
-                            </button>
+                        <Link
+                            href="/employees"
+                            style={{
+                                background: '#6c757d',
+                                color: 'white',
+                                padding: '10px 30px',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '14px',
+                                fontWeight: 'bold',
+                                textDecoration: 'none',
+                                display: 'inline-block',
+                                lineHeight: '1.5'
+                            }}
+                        >
+                            Cancel
                         </Link>
                     </div>
                 </form>

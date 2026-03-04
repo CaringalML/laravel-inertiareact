@@ -1,9 +1,31 @@
 import { Link, usePage, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/lib/supabase';
 
 export default function Index({ employees }) {
     const { flash } = usePage().props;
     const [searchTerm, setSearchTerm] = useState('');
+
+    // Real-time subscription to employees table
+    useEffect(() => {
+        const channel = supabase
+            .channel('employees-changes')
+            .on(
+                'postgres_changes',
+                { event: '*', schema: 'public', table: 'employees' },
+                (payload) => {
+                    console.log('Real-time change received:', payload);
+                    router.reload({ only: ['employees'] });
+                }
+            )
+            .subscribe((status) => {
+                console.log('Supabase channel status:', status);
+            });
+
+        return () => {
+            supabase.removeChannel(channel);
+        };
+    }, []);
 
     const filteredEmployees = employees.filter(emp =>
         emp.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -38,19 +60,21 @@ export default function Index({ employees }) {
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
                     <h1 style={{ margin: 0, color: '#333' }}>Employees</h1>
-                    <Link href={route('employees.create')}>
-                        <button style={{
+                    <Link
+                        href={route('employees.create')}
+                        style={{
                             background: '#007bff',
                             color: 'white',
                             padding: '10px 20px',
-                            border: 'none',
                             borderRadius: '4px',
                             cursor: 'pointer',
                             fontSize: '14px',
-                            fontWeight: 'bold'
-                        }}>
-                            + Add Employee
-                        </button>
+                            fontWeight: 'bold',
+                            textDecoration: 'none',
+                            display: 'inline-block'
+                        }}
+                    >
+                        + Add Employee
                     </Link>
                 </div>
 
@@ -112,8 +136,11 @@ export default function Index({ employees }) {
                                             </span>
                                         </td>
                                         <td style={{ ...tdStyle, textAlign: 'center' }}>
-                                            <Link href={route('employees.edit', employee.id)}>
-                                                <button style={editBtnStyle}>Edit</button>
+                                            <Link
+                                                href={route('employees.edit', employee.id)}
+                                                style={editBtnStyle}
+                                            >
+                                                Edit
                                             </Link>
                                             <button
                                                 onClick={() => handleDelete(employee.id)}
@@ -156,12 +183,13 @@ const editBtnStyle = {
     background: '#28a745',
     color: 'white',
     padding: '6px 12px',
-    border: 'none',
     borderRadius: '4px',
     cursor: 'pointer',
     marginRight: '5px',
     fontSize: '12px',
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    textDecoration: 'none',
+    display: 'inline-block'
 };
 
 const deleteBtnStyle = {
